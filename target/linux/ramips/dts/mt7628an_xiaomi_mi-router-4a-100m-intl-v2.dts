@@ -3,7 +3,6 @@
 #include <dt-bindings/leds/common.h>
 
 #include "mt7628an_xiaomi_mi-router-4.dtsi"
-
 / {
 	compatible = "xiaomi,mi-router-4a-100m-intl-v2", "mediatek,mt7628an-soc";
 	model = "Xiaomi Mi Router 4A (100M International Edition V2)";
@@ -58,6 +57,41 @@
 	status = "okay";
 };
 
+&pcie0 {
+	wifi@0,0 {
+		compatible = "mediatek,mt76";
+		reg = <0x0000 0 0 0 0>;
+		mediatek,mtd-eeprom = <&factory 0x8000>;
+		ieee80211-freq-limit = <5000000 6000000>;
+	};
+};
+
+&ethernet {
+	nvmem-cells = <&macaddr_factory_4>;
+	nvmem-cell-names = "mac-address";
+	mac-address-increment = <(-1)>;
+};
+
+&esw {
+	mediatek,portmap = <0x3e>;
+	mediatek,portdisable = <0x2a>;
+};
+
+&factory {
+	compatible = "nvmem-cells";
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	macaddr_factory_4: macaddr@4 {
+		reg = <0x4 0x6>;
+	};
+
+	eeprom_factory_8000: eeprom@8000 {
+		reg = <0x8000 0x4da8>;
+	};
+
+};
+
 &eeprom_factory_8000 {
 	/* MT7613 has different eeprom size '0x4da8'			*/
 	/* See https://github.com/openwrt/openwrt/pull/13587		*/
@@ -71,24 +105,4 @@
 	/* and MT7615_EEPROM_TXDPD_SIZE = 216.				*/
 	/* Altogether it will be 19880 or 0x4da8.			*/
 	reg = <0x8000 0x4da8>;
-};
-
-&pcie0 {
-	wifi@0,0 {
-		compatible = "mediatek,mt76";
-		reg = <0x0000 0 0 0 0>;
-		nvmem-cells = <&eeprom_factory_8000>;
-		nvmem-cell-names = "eeprom";
-		ieee80211-freq-limit = <5000000 6000000>;
-	};
-};
-
-&ethernet {
-	nvmem-cells = <&macaddr_factory_4 (-1)>;
-	nvmem-cell-names = "mac-address";
-};
-
-&esw {
-	mediatek,portmap = <0x3e>;
-	mediatek,portdisable = <0x2a>;
 };
